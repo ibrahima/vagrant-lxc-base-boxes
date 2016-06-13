@@ -15,7 +15,7 @@ log "Sleeping for $SECS seconds..."
 sleep $SECS
 
 # TODO: Support for appending to this list from outside
-PACKAGES=(vim curl wget man-db openssh-server bash-completion python-software-properties ca-certificates sudo)
+PACKAGES=(vim curl wget man-db openssh-server bash-completion python-software-properties ca-certificates sudo build-essential)
 if [ $DISTRIBUTION = 'ubuntu' ]; then
   PACKAGES+=' software-properties-common'
 fi
@@ -115,4 +115,14 @@ EOF
   fi
 else
   log "Skipping Babushka installation"
+fi
+
+if [ $RUBY_INSTALL = 1 ]; then
+  log "Installing Ruby version ${RUBY_VERSION:-2.3.1} via ruby-install"
+  wget -O "${ROOTFS}/tmp/ruby-install-0.6.0.tar.gz" https://github.com/postmodern/ruby-install/archive/v0.6.0.tar.gz
+  utils.lxc.attach tar -xzvf /tmp/ruby-install-0.6.0.tar.gz -C /tmp/
+  utils.lxc.attach bash -c "cd /tmp/ruby-install-0.6.0/ && make install"
+  utils.lxc.attach ruby-install --system ruby ${RUBY_VERSION:-2.3.1} -- --disable-install-doc
+else
+  log "Skipping Ruby installation"
 fi
